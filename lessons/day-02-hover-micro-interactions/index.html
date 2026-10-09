@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 2 · Refined hover micro-interactions — Motion Library</title>
+<style>
+  :root { --bg:#0e0e12; --card:#17171d; --text:#eee; --muted:#9a9aa3; --accent:#6c4dff; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,"Helvetica Neue","Segoe UI",sans-serif; background:var(--bg); color:var(--text); margin:0; padding:40px 24px 80px; }
+  .wrap { max-width:880px; margin:0 auto; }
+  .back { color:var(--muted); text-decoration:none; font-size:14px; }
+  .back:hover { color:var(--accent); }
+  h1 { font-size:32px; margin:16px 0 8px; }
+  .lede { color:var(--muted); font-size:16px; line-height:1.8; }
+  .lede b { color:var(--text); }
+  section { background:var(--card); border:1px solid #26262e; border-radius:14px; padding:28px; margin:24px 0; }
+  section h2 { font-size:18px; margin:0 0 6px; }
+  section h2 .no { color:var(--accent); margin-right:8px; }
+  section .why { color:var(--muted); font-size:14px; line-height:1.85; margin:0 0 22px; }
+  section .why b { color:var(--text); }
+  .row { display:flex; gap:16px; flex-wrap:wrap; align-items:stretch; }
+  .variant { flex:1; min-width:210px; text-align:center; padding:26px 16px; background:#101014; border-radius:10px; border:1px dashed #2e2e36; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
+  .variant .label { font-size:12.5px; color:var(--muted); line-height:1.7; }
+  .variant .label code { color:var(--accent); font-family:Menlo,Consolas,monospace; }
+  .variant .pick { font-size:12px; color:#0e0e12; background:#7dffb2; border-radius:999px; padding:2px 10px; font-weight:600; }
+
+  .btn { display:inline-block; padding:12px 30px; border-radius:999px; background:#6c4dff; color:#fff; border:none; font-size:15px; cursor:pointer; }
+  .ease-a { transition:transform .35s ease; }
+  .ease-a:hover { transform:translateY(-4px); }
+  .ease-b { transition:transform .5s cubic-bezier(.22,1,.36,1); }
+  .ease-b:hover { transform:translateY(-4px); }
+  .ease-c { transition:transform .5s cubic-bezier(.34,1.56,.64,1); }
+  .ease-c:hover { transform:translateY(-4px); }
+
+  .mag { transition:transform .25s cubic-bezier(.22,1,.36,1); }
+
+  .tilt { width:100%; max-width:250px; height:150px; border-radius:12px; background:linear-gradient(135deg,#2b2b38,#191922); display:flex; align-items:center; justify-content:center; font-size:15px; position:relative; overflow:hidden; transition:transform .25s ease-out, box-shadow .35s ease; }
+  .tilt.refined::after { content:''; position:absolute; inset:0; background:radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,.16), transparent 60%); opacity:0; transition:opacity .35s; pointer-events:none; }
+  .tilt.refined:hover::after { opacity:1; }
+  .tilt.refined:hover { box-shadow:0 24px 48px rgba(0,0,0,.5); }
+
+  .link { color:var(--text); text-decoration:none; position:relative; font-size:17px; }
+  .link.u-a::after { content:''; position:absolute; left:0; bottom:-5px; height:2px; width:100%; background:var(--accent); opacity:0; transition:opacity .2s; }
+  .link.u-a:hover::after { opacity:1; }
+  .link.u-b::after { content:''; position:absolute; left:0; bottom:-5px; height:2px; width:100%; background:var(--accent); transform:scaleX(0); transform-origin:left; transition:transform .45s cubic-bezier(.22,1,.36,1); }
+  .link.u-b:hover::after { transform:scaleX(1); }
+
+  .zoom { width:100%; max-width:300px; aspect-ratio:16/10; overflow:hidden; border-radius:12px; }
+  .zoom .ph { width:100%; height:100%; background:linear-gradient(120deg,#6c4dff,#2dd4bf); }
+  .zoom.z-a .ph { transition:transform .5s ease; }
+  .zoom.z-a:hover .ph { transform:scale(1.15); }
+  .zoom.z-b .ph { transition:transform 1.4s cubic-bezier(.22,1,.36,1); }
+  .zoom.z-b:hover .ph { transform:scale(1.06); }
+
+  h2 { font-size:20px; margin:40px 0 12px; }
+  .note { background:var(--card); border-left:3px solid var(--accent); border-radius:0 10px 10px 0; padding:14px 18px; margin:12px 0; font-size:14.5px; line-height:1.85; }
+  .note b { color:var(--accent); }
+  ul { color:var(--muted); line-height:1.9; font-size:14.5px; padding-left:20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../../index.html">← Motion Library</a>
+  <h1>Day 2 · Refined hover micro-interactions</h1>
+  <p class="lede">Refinement = <b>easing with personality</b> + <b>restraint in timing</b> + <b>a complete return trip</b>. Each effect below comes in 2–3 variants, side by side — <b>hover them yourself</b> and pick the one that feels right. That pick becomes your site's personality.</p>
+
+  <section>
+    <h2><span class="no">01</span>Easing is personality</h2>
+    <p class="why">Same 4px lift — the easing decides whether it feels mechanical or refined. <b>Ease-out curves (e.g. cubic-bezier(.22,1,.36,1)) start fast and settle slow</b>, closest to how things move in the physical world. Overshoot is for playful contexts, not serious buttons.</p>
+    <div class="row">
+      <div class="variant"><button class="btn ease-a">Hover me</button><div class="label"><code>ease</code><br>default, a bit abrupt</div></div>
+      <div class="variant"><button class="btn ease-b">Hover me</button><div class="label"><code>cubic-bezier(.22,1,.36,1)</code><br>smooth &amp; refined <span class="pick">pick</span></div></div>
+      <div class="variant"><button class="btn ease-c">Hover me</button><div class="label"><code>cubic-bezier(.34,1.56,.64,1)</code><br>springy, playful</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">02</span>Magnetic button: restraint is a virtue</h2>
+    <p class="why">The button gets pulled toward the cursor. Refinement is about strength — <b>around 0.25 feels just right</b>; above 0.45 it gets greasy. Note the return trip: the transition lives on the element itself, so it glides back when the cursor leaves.</p>
+    <div class="row">
+      <div class="variant"><button class="btn mag" data-strength="0.15">Hover me</button><div class="label">strength <code>0.15</code><br>barely there</div></div>
+      <div class="variant"><button class="btn mag" data-strength="0.28">Hover me</button><div class="label">strength <code>0.28</code><br>restrained <span class="pick">pick</span></div></div>
+      <div class="variant"><button class="btn mag" data-strength="0.5">Hover me</button><div class="label">strength <code>0.5</code><br>grease warning</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">03</span>3D tilt: convince the brain it's solid</h2>
+    <p class="why">Bare tilt looks like a wobbling sheet of paper. Add a <b>cursor-following highlight</b> and a <b>deepening shadow</b>, and the brain reads it as an object with thickness — the side dishes create the refinement.</p>
+    <div class="row">
+      <div class="variant"><div class="tilt" data-tilt>bare tilt</div><div class="label">rotation only<br>like paper</div></div>
+      <div class="variant"><div class="tilt refined" data-tilt>refined tilt</div><div class="label">rotation + glare + shadow <span class="pick">pick</span><br>has depth</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">04</span>Underline: appearing vs growing</h2>
+    <p class="why">The classic nav-link question. <b>An opacity toggle "appears"; a scaleX "grows"</b> — growing feels more refined. Use it for portfolio nav.</p>
+    <div class="row">
+      <div class="variant"><a class="link u-a" href="#">Case studies</a><div class="label"><code>opacity</code> toggle<br>abrupt</div></div>
+      <div class="variant"><a class="link u-b" href="#">Case studies</a><div class="label"><code>scaleX</code> grow <span class="pick">pick</span><br>grows from the left</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">05</span>Image zoom: slow reads premium</h2>
+    <p class="why"><b>Slow + subtle (1.06 over 1.4s) reads premium; fast + large (1.15 over 0.5s) reads cheap.</b> Use the slow one for every case-study cover.</p>
+    <div class="row">
+      <div class="variant"><div class="zoom z-a"><div class="ph"></div></div><div class="label"><code>scale(1.15) / .5s</code><br>rushed, cheap</div></div>
+      <div class="variant"><div class="zoom z-b"><div class="ph"></div></div><div class="label"><code>scale(1.06) / 1.4s</code> <span class="pick">pick</span><br>slow, premium</div></div>
+    </div>
+  </section>
+
+  <h2>Exercise</h2>
+  <div class="note">Open this file's source, change the second magnetic button's <code>data-strength="0.28"</code> to <code>0.5</code>, then to <code>0.15</code> — walk the full spectrum from "greasy" to "restrained" to "numb" by hand. Then write down <b>your</b> number — it becomes your site's standard button strength.</div>
+
+  <h2>Pitfall</h2>
+  <div class="note"><b>Put <code>transition</code> on the element itself, never inside <code>:hover</code>.</b> In <code>:hover</code>, the moment the cursor leaves the transition is gone and the element snaps back instantly — all that refinement wasted. The most common hover-motion fail.</div>
+
+  <h2>Where to use it in your portfolio</h2>
+  <ul>
+    <li>Nav links → 04's scaleX growing underline</li>
+    <li>CTA buttons → 02's magnetic (0.28) + 01's ease-out</li>
+    <li>Case cards → 03's refined tilt</li>
+    <li>Case cover images → 05's slow zoom</li>
+  </ul>
+</div>
+
+<script>
+  // Magnetic: button follows the cursor
+  document.querySelectorAll('.mag').forEach(btn => {
+    const s = parseFloat(btn.dataset.strength || 0.3);
+    btn.addEventListener('mousemove', e => {
+      const r = btn.getBoundingClientRect();
+      const x = e.clientX - r.left - r.width / 2;
+      const y = e.clientY - r.top - r.height / 2;
+      btn.style.transform = `translate(${x * s}px, ${y * s}px)`;
+    });
+    btn.addEventListener('mouseleave', () => { btn.style.transform = 'translate(0,0)'; });
+  });
+
+  // Tilt: card tilts in 3D following the cursor + glare position
+  document.querySelectorAll('[data-tilt]').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(800px) rotateX(${(-py * 10).toFixed(2)}deg) rotateY(${(px * 10).toFixed(2)}deg)`;
+      card.style.setProperty('--mx', `${((px + 0.5) * 100).toFixed(1)}%`);
+      card.style.setProperty('--my', `${((py + 0.5) * 100).toFixed(1)}%`);
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg)'; });
+  });
+</script>
+</body>
+</html>
