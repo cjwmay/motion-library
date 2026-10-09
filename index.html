@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Motion Library · 每天一个前端动效小练习</title>
+<style>
+  :root { --bg: #0e0e12; --card: #17171d; --text: #eee; --muted: #9a9aa3; --accent: #6c4dff; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    background: var(--bg); color: var(--text);
+    margin: 0; padding: 48px 24px 80px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  header { margin-bottom: 40px; }
+  h1 { font-size: 40px; margin: 0 0 12px; letter-spacing: -0.5px; }
+  h1 .dot { color: var(--accent); }
+  .sub { color: var(--muted); font-size: 17px; line-height: 1.7; margin: 0; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--card); border: 1px solid #26262e; border-radius: 14px;
+    padding: 22px; text-decoration: none; color: inherit; display: block;
+    transition: transform .25s ease, border-color .25s ease;
+  }
+  a.card:hover { transform: translateY(-4px); border-color: var(--accent); }
+  .card .day { font-size: 12px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
+  .card h2 { font-size: 19px; margin: 8px 0 8px; }
+  .card p { color: var(--muted); font-size: 14px; line-height: 1.65; margin: 0; }
+  .card .tag {
+    display: inline-block; margin-top: 12px; font-size: 12px; color: var(--muted);
+    border: 1px solid #2e2e36; border-radius: 999px; padding: 3px 10px;
+  }
+  .card.soon { opacity: .55; }
+  footer { margin-top: 56px; color: var(--muted); font-size: 13px; line-height: 1.8; }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Motion Library<span class="dot">.</span></h1>
+    <p class="sub">One front-end motion micro-exercise a day.<br>每天一个前端动效小练习 — 为作品集自建站打基础，从 CSS 到 GSAP 再到 3D。</p>
+  </header>
+
+  <div class="grid">
+    <a class="card" href="lessons/day-01-css-basics/">
+      <div class="day">Day 1</div>
+      <h2>CSS 动效三件套</h2>
+      <p>transition / transform / easing —— hero 标题逐词入场 + 按钮 hover 上浮。所有动效的地基。</p>
+      <span class="tag">已完成 ✓</span>
+    </a>
+    <div class="card soon">
+      <div class="day">Day 2</div>
+      <h2>悬停微交互</h2>
+      <p>magnetic button、卡片 3D tilt、图片 zoom —— 让界面"活"起来的悬停细节。</p>
+      <span class="tag">即将到来</span>
+    </div>
+    <div class="card soon">
+      <div class="day">Day 3</div>
+      <h2>滚动触发动画</h2>
+      <p>IntersectionObserver reveal、stagger 序列动画 —— 内容随滚动优雅出现。</p>
+      <span class="tag">即将到来</span>
+    </div>
+    <div class="card soon">
+      <div class="day">Day 4</div>
+      <h2>GSAP + ScrollTrigger</h2>
+      <p>pin、scrub、parallax、text reveal —— 专业级滚动叙事动效。</p>
+      <span class="tag">即将到来</span>
+    </div>
+    <div class="card soon">
+      <div class="day">Day 5</div>
+      <h2>Lenis 顺滑滚动</h2>
+      <p>丝滑的惯性滚动体验 —— 高端作品集站点的标配手感。</p>
+      <span class="tag">即将到来</span>
+    </div>
+    <div class="card soon">
+      <div class="day">Day 6</div>
+      <h2>Marquee / 自定义光标 / Preloader</h2>
+      <p>跑马灯、custom cursor、加载动画 —— 站点的氛围感三件套。</p>
+      <span class="tag">即将到来</span>
+    </div>
+    <div class="card soon">
+      <div class="day">Day 7</div>
+      <h2>进阶：3D 与 Shader</h2>
+      <p>Three.js / React Three Fiber 做 hero 3D、shader 背景 —— 视觉天花板。</p>
+      <span class="tag">即将到来</span>
+    </div>
+    <div class="card soon">
+      <div class="day">Day 8</div>
+      <h2>性能与可访问性</h2>
+      <p>prefers-reduced-motion、性能预算 —— 动效的克制与责任。</p>
+      <span class="tag">即将到来</span>
+    </div>
+  </div>
+
+  <footer>
+    Built while learning — 每天一节微课堂，学完即存档。<br>
+    在 StackBlitz 里打开这个 repo 即可运行每一课。
+  </footer>
+</div>
+</body>
+</html>
