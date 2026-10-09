@@ -13,7 +13,7 @@ A daily practice library building toward a self-made portfolio site (MVP 11/22):
 ## Progress
 
 - [x] Day 1 · The CSS motion trio (transition / transform / easing)
-- [ ] Day 2 · Hover micro-interactions (magnetic button, 3D card tilt, image zoom)
+- [x] Day 2 · Refined hover micro-interactions (easing lab, magnetic button, 3D tilt, underline, image zoom)
 - [ ] Day 3 · Scroll-triggered animation (IntersectionObserver reveal, stagger)
 - [ ] Day 4 · GSAP + ScrollTrigger (pin, scrub, parallax, text reveal)
 - [ ] Day 5 · Lenis smooth scrolling
