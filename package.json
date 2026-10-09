@@ -1,0 +1,1 @@
+{"description":"One front-end motion micro-exercise a day.","devDependencies":{"servor":"^4.0.2"},"name":"motion-library","private":true,"scripts":{"dev":"servor --reload"},"version":"1.0.0"}
