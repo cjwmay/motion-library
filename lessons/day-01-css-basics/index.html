@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 1 · CSS 动效三件套 — Motion Library</title>
+<style>
+  :root { --bg: #0e0e12; --card: #17171d; --text: #eee; --muted: #9a9aa3; --accent: #6c4dff; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    background: var(--bg); color: var(--text); margin: 0; padding: 40px 24px 80px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  .back { color: var(--muted); text-decoration: none; font-size: 14px; }
+  .back:hover { color: var(--accent); }
+  h1 { font-size: 32px; margin: 16px 0 8px; }
+  .lede { color: var(--muted); font-size: 16px; line-height: 1.8; }
+
+  /* ===== Demo 区 ===== */
+  .demo {
+    background: var(--card); border: 1px solid #26262e; border-radius: 14px;
+    padding: 56px 24px; margin: 32px 0; text-align: center; overflow: hidden;
+  }
+  .btn {
+    padding: 12px 28px; border-radius: 999px;
+    background: #6c4dff; color: #fff; border: none;
+    font-size: 16px; cursor: pointer;
+    /* 关键：只过渡 transform 和 opacity（GPU 加速，不卡顿） */
+    transition: transform .35s cubic-bezier(.2,.7,.2,1.2),
+                box-shadow .35s ease;
+  }
+  .btn:hover {
+    transform: translateY(-4px) scale(1.04); /* 上浮+微放大 */
+    box-shadow: 0 12px 24px rgba(108,77,255,.35);
+  }
+  .hero-title { font-size: 48px; margin: 0 0 32px; }
+  .hero-title span {
+    display: inline-block; opacity: 0;
+    transform: translateY(30px);
+    animation: rise .8s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  .hero-title span:nth-child(2) { animation-delay: .12s; }
+  .hero-title span:nth-child(3) { animation-delay: .24s; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+
+  /* ===== 代码 / 笔记区 ===== */
+  h2 { font-size: 20px; margin: 40px 0 12px; }
+  pre {
+    background: #101014; border: 1px solid #26262e; border-radius: 10px;
+    padding: 18px; overflow-x: auto; font-size: 13.5px; line-height: 1.7;
+  }
+  code { font-family: "SF Mono", Menlo, Consolas, monospace; }
+  .note {
+    background: var(--card); border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0; padding: 14px 18px; margin: 12px 0;
+    font-size: 14.5px; line-height: 1.8; color: var(--text);
+  }
+  .note b { color: var(--accent); }
+  ul { color: var(--muted); line-height: 1.9; font-size: 14.5px; padding-left: 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../../index.html">← Motion Library</a>
+  <h1>Day 1 · CSS 动效三件套</h1>
+  <p class="lede">所有网页动效的地基 —— <code>transition</code> 管"怎么变过去"，<code>transform</code> 管"变什么"（位移 / 缩放 / 旋转），<code>easing</code> 管"变的节奏"。Portfolio 里 hero 标题入场、按钮 hover、卡片浮起，全是这三件套的组合。</p>
+
+  <div class="demo">
+    <h1 class="hero-title"><span>Designing</span> <span>for</span> <span>AI</span></h1>
+    <button class="btn">View case study</button>
+  </div>
+
+  <h2>代码</h2>
+  <pre><code>.btn {
+  padding: 12px 28px; border-radius: 999px;
+  background: #6c4dff; color: #fff; border: none;
+  /* 只过渡 transform 和 opacity（GPU 加速，不卡顿） */
+  transition: transform .35s cubic-bezier(.2,.7,.2,1.2),
+              box-shadow .35s ease;
+}
+.btn:hover {
+  transform: translateY(-4px) scale(1.04); /* 上浮+微放大 */
+  box-shadow: 0 12px 24px rgba(108,77,255,.35);
+}
+.hero-title span {
+  display: inline-block; opacity: 0;
+  transform: translateY(30px);
+  animation: rise .8s cubic-bezier(.2,.7,.2,1) forwards;
+}
+.hero-title span:nth-child(2) { animation-delay: .12s; }
+.hero-title span:nth-child(3) { animation-delay: .24s; }
+@keyframes rise { to { opacity: 1; transform: none; } }</code></pre>
+
+  <h2>练习</h2>
+  <div class="note">把 <code>translateY(-4px)</code> 改成 <code>-10px</code>、把 <code>.35s</code> 改成 <code>.15s</code> 和 <code>.8s</code>，分别感受"太冲"和"太肉" —— 找到你觉得顺滑的那个值，记下来作为站点的统一时长。</div>
+
+  <h2>避坑</h2>
+  <div class="note"><b>只用 <code>transform</code> 和 <code>opacity</code> 做动画。</b><code>top / left / width / margin</code> 会触发浏览器重排（reflow），手机上直接掉帧 —— 这是新手最常见的卡顿来源。</div>
+
+  <h2>在 portfolio 哪里用</h2>
+  <ul>
+    <li>首页 hero 标题逐词入场（第一印象）</li>
+    <li>所有按钮的 hover 反馈</li>
+    <li>Case 卡片 hover 上浮</li>
+  </ul>
+</div>
+</body>
+</html>
