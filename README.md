@@ -2,21 +2,21 @@
 
 One front-end motion micro-exercise a day.
 
-每天一个前端动效小练习 — 为作品集自建站（11/22 MVP）打基础：从 CSS 动效三件套开始，逐步到 GSAP、Lenis、Three.js。
+A daily practice library building toward a self-made portfolio site (MVP 11/22): starting from CSS motion basics, progressing through GSAP, Lenis, and Three.js.
 
-## 怎么用
+## How to use
 
-- **在 StackBlitz 里打开**：Import from GitHub → 粘贴这个 repo 地址
-- **本地打开**：直接用浏览器打开 `index.html`
-- 首页是课程目录，每节课在 `lessons/day-XX-xxx/` 下独立成页，每页都可直接运行：看 demo → 读代码 → 做练习
+- **Open in StackBlitz**: Import from GitHub → paste this repo's URL
+- **Open locally**: open `index.html` in any browser
+- The home page is the course catalog; each lesson lives in `lessons/day-XX-xxx/` as a standalone page. Every page runs as-is: watch the demo → read the code → do the exercise.
 
-## 课程进度
+## Progress
 
-- [x] Day 1 · CSS 动效三件套（transition / transform / easing）
-- [ ] Day 2 · 悬停微交互（magnetic button、卡片 3D tilt、图片 zoom）
-- [ ] Day 3 · 滚动触发动画（IntersectionObserver reveal、stagger）
-- [ ] Day 4 · GSAP + ScrollTrigger（pin、scrub、parallax、text reveal）
-- [ ] Day 5 · Lenis 顺滑滚动
-- [ ] Day 6 · Marquee、custom cursor、preloader
-- [ ] Day 7 · 进阶：Three.js / React Three Fiber、shader 背景
-- [ ] Day 8 · 性能与可访问性（prefers-reduced-motion、性能预算）
+- [x] Day 1 · The CSS motion trio (transition / transform / easing)
+- [ ] Day 2 · Hover micro-interactions (magnetic button, 3D card tilt, image zoom)
+- [ ] Day 3 · Scroll-triggered animation (IntersectionObserver reveal, stagger)
+- [ ] Day 4 · GSAP + ScrollTrigger (pin, scrub, parallax, text reveal)
+- [ ] Day 5 · Lenis smooth scrolling
+- [ ] Day 6 · Marquee, custom cursor, preloader
+- [ ] Day 7 · Advanced: Three.js / React Three Fiber, shader backgrounds
+- [ ] Day 8 · Performance & accessibility (prefers-reduced-motion, performance budgets)
