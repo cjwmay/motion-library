@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 3 · Scroll-triggered animation — Motion Library</title>
+<style>
+  :root { --bg:#0e0e12; --card:#17171d; --text:#eee; --muted:#9a9aa3; --accent:#6c4dff; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,"Helvetica Neue","Segoe UI",sans-serif; background:var(--bg); color:var(--text); margin:0; padding:40px 24px 120px; }
+  .wrap { max-width:880px; margin:0 auto; }
+  .back { color:var(--muted); text-decoration:none; font-size:14px; }
+  .back:hover { color:var(--accent); }
+  h1 { font-size:32px; margin:16px 0 8px; }
+  .lede { color:var(--muted); font-size:16px; line-height:1.8; }
+  .lede b { color:var(--text); }
+  section { background:var(--card); border:1px solid #26262e; border-radius:14px; padding:28px; margin:80px 0; }
+  section h2 { font-size:18px; margin:0 0 6px; }
+  section h2 .no { color:var(--accent); margin-right:8px; }
+  section .why { color:var(--muted); font-size:14px; line-height:1.85; margin:0 0 22px; }
+  section .why b { color:var(--text); }
+  .row { display:flex; gap:16px; flex-wrap:wrap; }
+  .variant { flex:1; min-width:200px; text-align:center; padding:30px 14px; background:#101014; border-radius:10px; border:1px dashed #2e2e36; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; min-height:150px; }
+  .variant .label { font-size:12.5px; color:var(--muted); line-height:1.8; }
+  .variant .label code { color:var(--accent); font-family:Menlo,Consolas,monospace; }
+  .variant .pick { font-size:12px; color:#0e0e12; background:#7dffb2; border-radius:999px; padding:2px 10px; font-weight:600; }
+
+  /* ---- The Day 3 reveal system ---- */
+  .js .reveal { opacity:0; transform:translateY(30px);
+    transition:opacity .8s cubic-bezier(.22,1,.36,1), transform .8s cubic-bezier(.22,1,.36,1);
+    transition-delay:var(--d, 0ms); }
+  .js .reveal.in { opacity:1; transform:none; }
+  .js .reveal.v-scale { transform:scale(.92); }
+  .js .reveal.v-blur { transform:none; filter:blur(10px); }
+  .js .reveal.v-scale.in, .js .reveal.v-blur.in { transform:none; filter:none; }
+
+  .card-demo { width:100%; height:96px; border-radius:10px; background:linear-gradient(135deg,#2b2b38,#191922);
+    display:flex; align-items:center; justify-content:center; font-size:14px; }
+  .dot { width:40px; height:40px; border-radius:50%; background:var(--accent); display:inline-block; margin:6px; }
+  .counter { font-size:26px; color:var(--accent); font-weight:700; }
+
+  h2 { font-size:20px; margin:40px 0 12px; }
+  .note { background:var(--card); border-left:3px solid var(--accent); border-radius:0 10px 10px 0; padding:14px 18px; margin:12px 0; font-size:14.5px; line-height:1.85; }
+  .note b { color:var(--accent); }
+  .note code, pre code { color:var(--accent); font-family:Menlo,Consolas,monospace; }
+  pre.code { background:#0a0a0d; border:1px solid #26262e; border-radius:10px; padding:18px; overflow-x:auto;
+    font-size:12.5px; line-height:1.75; color:#c9c9d4; font-family:Menlo,Consolas,monospace; margin:12px 0 0; }
+  ul { color:var(--muted); line-height:1.9; font-size:14.5px; padding-left:20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../../index.html">← Motion Library</a>
+  <h1>Day 3 · Scroll-triggered animation</h1>
+  <p class="lede">One native tool does almost all of it: <b>IntersectionObserver</b> — the browser's built-in "element entered the viewport" sentinel, with zero scroll listeners and zero performance tax. Scroll down: each lab below animates itself. <b>Play with them</b> and lock in your site's reveal personality.</p>
+
+  <section>
+    <h2><span class="no">01</span>Trigger timing: threshold</h2>
+    <p class="why">Same card, three <code>threshold</code> values — fires when <b>5%</b> / <b>30%</b> / <b>60%</b> of the element is visible. The 60% one visibly lags; on a fast scroll it feels like it never caught up. For portfolios, <b>0.1–0.2</b> is the sweet spot — start the animation early.</p>
+    <div class="row">
+      <div class="variant"><div class="card-demo reveal" data-th="0.05">threshold 0.05</div><div class="label">fires on a sliver <span class="pick">pick</span></div></div>
+      <div class="variant"><div class="card-demo reveal" data-th="0.3">threshold 0.3</div><div class="label">fires when partly in</div></div>
+      <div class="variant"><div class="card-demo reveal" data-th="0.6">threshold 0.6</div><div class="label">fires when mostly in<br>lags on fast scroll</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">02</span>Entrance pose: rise / scale / blur</h2>
+    <p class="why"><b>Rise (fade-up)</b> is the safe universal choice; <b>scale (.92→1)</b> gives card grids a pop of presence; <b>blur (10px→0)</b> is the most cinematic — but <code>filter: blur</code> is a GPU hog, use sparingly on mobile. Pick <b>one</b> pose per page; never mix.</p>
+    <div class="row">
+      <div class="variant"><div class="card-demo reveal">fade-up</div><div class="label"><code>translateY(30px)</code> <span class="pick">pick</span><br>safe, universal</div></div>
+      <div class="variant"><div class="card-demo reveal v-scale">scale</div><div class="label"><code>scale(.92)</code><br>for card grids</div></div>
+      <div class="variant"><div class="card-demo reveal v-blur">blur-in</div><div class="label"><code>blur(10px)</code><br>cinematic, GPU-heavy</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">03</span>Stagger rhythm: how many ms feels right?</h2>
+    <p class="why">Same dot row, three gaps: <b>60ms</b> ripples, <b>120ms</b> feels composed, <b>240ms</b> starts to drag. Implementation trick: each child gets a <code>--d</code> custom property and the shared transition reads <code>transition-delay: var(--d)</code>. Choose your number — it becomes your site-wide stagger standard.</p>
+    <div class="variant" style="margin-bottom:14px"><div class="reveal" data-stagger="60"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><div class="label" style="margin-top:10px">60ms · ripples</div></div>
+    <div class="variant" style="margin-bottom:14px"><div class="reveal" data-stagger="120"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><div class="label" style="margin-top:10px">120ms · composed <span class="pick">pick</span></div></div>
+    <div class="variant"><div class="reveal" data-stagger="240"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><div class="label" style="margin-top:10px">240ms · drags</div></div>
+  </section>
+
+  <section>
+    <h2><span class="no">04</span>Play once or replay?</h2>
+    <p class="why">Left: <b>play once</b> — <code>unobserve()</code> after the first trigger, the default for content. Right: <b>replay every entry</b> (watch the counter grow as you scroll up and down) — remove <code>.in</code> on exit. Use replay only for decorative loops, never for body content.</p>
+    <div class="row">
+      <div class="variant"><div class="card-demo reveal" data-once>play once</div><div class="label"><code>unobserve()</code> after firing <span class="pick">pick</span></div></div>
+      <div class="variant"><div class="card-demo reveal" data-repeat>replayed <span class="counter" id="replayCount">0</span>×</div><div class="label">fires on every entry<br>removes <code>.in</code> on exit</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">05</span>rootMargin: the head start</h2>
+    <p class="why"><code>rootMargin: '0px 0px 100px 0px'</code> pushes the trigger line 100px below the viewport — the animation <b>starts before the element is visible</b>, so fast scrollers still see it land gracefully. Scroll through quickly and compare which side feels more composed.</p>
+    <div class="row">
+      <div class="variant"><div class="card-demo reveal" data-rm="0">no head start</div><div class="label"><code>rootMargin: 0</code><br>fires at the edge</div></div>
+      <div class="variant"><div class="card-demo reveal" data-rm="100">100px head start</div><div class="label"><code>rootMargin: 0 0 100px 0</code> <span class="pick">pick</span><br>composed on fast scroll</div></div>
+    </div>
+  </section>
+
+  <h2>The copy-paste kit</h2>
+<pre class="code">&lt;!-- HTML: .reveal on anything that should animate; data-stagger on groups --&gt;
+&lt;h2 class="reveal"&gt;Case study title&lt;/h2&gt;
+&lt;div class="reveal" data-stagger&gt;
+  &lt;div class="card"&gt;…&lt;/div&gt;&lt;div class="card"&gt;…&lt;/div&gt;&lt;div class="card"&gt;…&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;style&gt;
+/* ⚠️ Initial hidden state lives under .js: no-JS users still see content */
+.js .reveal { opacity: 0; transform: translateY(28px);
+  transition: opacity .8s cubic-bezier(.22,1,.36,1),
+              transform .8s cubic-bezier(.22,1,.36,1);
+  transition-delay: var(--d, 0ms); }   /* stagger gap */
+.js .reveal.in { opacity: 1; transform: none; }
+&lt;/style&gt;
+
+&lt;script&gt;
+document.documentElement.classList.add('js'); // hide only when JS runs
+
+const io = new IntersectionObserver(entries =&gt; {
+  entries.forEach(e =&gt; {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' });
+
+document.querySelectorAll('[data-stagger]').forEach(group =&gt;
+  [...group.children].forEach((c, i) =&gt; {
+    c.classList.add('reveal');
+    c.style.setProperty('--d', i * 100 + 'ms');
+    io.observe(c);
+  })
+);
+document.querySelectorAll('.reveal').forEach(el =&gt; io.observe(el));
+&lt;/script&gt;</pre>
+
+  <h2>Exercise</h2>
+  <div class="note">Add <code>class="reveal"</code> to every case-study section on your site, and <code>data-stagger</code> to card grids and feature lists. Use the stagger interval you picked in lab 03 — it is now your site-wide standard.</div>
+
+  <h2>Pitfall</h2>
+  <div class="note"><b>Never put <code>opacity: 0</code> on the element or a plain class.</b> Hide it only behind a <code>.js</code> flag that JavaScript itself adds on line one. If JS fails, errors, or gets blocked, a plain <code>opacity: 0</code> turns your whole page into a blank page that "works fine in the code". Day 2's lesson was the transition in the wrong place; Day 3's is the initial state in the wrong place.</div>
+  <div class="note"><b>Tall blocks need low thresholds.</b> A section taller than the viewport can never reach <code>threshold: 0.5</code> — its animation never fires. Give tall sections <code>threshold: 0.05</code> or their own observer.</div>
+
+  <h2>Where to use it in your portfolio</h2>
+  <ul>
+    <li>Every case-study section → <code>.reveal</code> with the 01 rise pose</li>
+    <li>Feature lists / image grids → <code>data-stagger</code> at your chosen interval</li>
+    <li>Long pages → <code>rootMargin</code> head start so fast scrollers see the landing</li>
+    <li>Hero on load → same <code>.in</code> class, triggered by JS on page load instead of scroll</li>
+  </ul>
+</div>
+
+<script>
+document.documentElement.classList.add('js');
+
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  });
+}, { threshold: 0.15 });
+
+function observeWith(el, opts) {
+  const o = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); o.unobserve(e.target); }
+    });
+  }, opts);
+  o.observe(el);
+}
+
+document.querySelectorAll('[data-th]').forEach(el =>
+  observeWith(el, { threshold: parseFloat(el.dataset.th) }));
+
+document.querySelectorAll('.reveal:not([data-th]):not([data-stagger]):not([data-once]):not([data-repeat]):not([data-rm])')
+  .forEach(el => io.observe(el));
+
+document.querySelectorAll('[data-stagger]').forEach(group => {
+  const base = parseInt(group.dataset.stagger, 10);
+  [...group.children].forEach((c, i) => {
+    c.classList.add('reveal');
+    c.style.setProperty('--d', (i * base) + 'ms');
+    io.observe(c);
+  });
+  io.observe(group); // the group parent must be observed too, or it stays opacity:0 and hides its children
+});
+
+document.querySelectorAll('[data-once]').forEach(el => io.observe(el));
+
+const countEl = document.getElementById('replayCount');
+document.querySelectorAll('[data-repeat]').forEach(el => {
+  const o = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('in'); countEl.textContent = +countEl.textContent + 1; }
+      else { e.target.classList.remove('in'); }
+    });
+  }, { threshold: 0.3 });
+  o.observe(el);
+});
+
+document.querySelectorAll('[data-rm]').forEach(el =>
+  observeWith(el, { threshold: 0.15, rootMargin: `0px 0px ${el.dataset.rm}px 0px` }));
+</script>
+</body>
+</html>
