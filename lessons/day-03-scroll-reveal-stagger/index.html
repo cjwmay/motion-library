@@ -15,7 +15,11 @@
   .lede { color:var(--muted); font-size:16px; line-height:1.8; }
   .lede b { color:var(--text); }
   section { background:var(--card); border:1px solid #26262e; border-radius:14px; padding:28px; margin:80px 0; }
-  section h2 { font-size:18px; margin:0 0 6px; }
+  section h2 { font-size:18px; margin:0 0 6px; display:flex; align-items:center; }
+  .sec-replay { margin-left:auto; flex:none; font-size:12.5px; padding:6px 14px; border-radius:999px;
+    border:1px solid #2e2e36; background:#101014; color:var(--muted); cursor:pointer;
+    transition:color .25s, border-color .25s; }
+  .sec-replay:hover { color:var(--text); border-color:var(--accent); }
   section h2 .no { color:var(--accent); margin-right:8px; }
   section .why { color:var(--muted); font-size:14px; line-height:1.85; margin:0 0 22px; }
   section .why b { color:var(--text); }
@@ -200,6 +204,32 @@ document.querySelectorAll('[data-repeat]').forEach(el => {
 
 document.querySelectorAll('[data-rm]').forEach(el =>
   observeWith(el, { threshold: 0.15, rootMargin: `0px 0px ${el.dataset.rm}px 0px` }));
+
+// Per-section replay: scroll to the section, strip .in, force reflow, re-add .in —
+// the animation replays in place, no page refresh needed.
+function replaySection(sec) {
+  sec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => {
+    const els = sec.querySelectorAll('.reveal');
+    els.forEach(el => el.classList.remove('in'));
+    void sec.offsetWidth; // force reflow, otherwise remove+add collapse into one frame and the transition never restarts
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      els.forEach(el => el.classList.add('in'));
+      const c = sec.querySelector('#replayCount');
+      if (c) c.textContent = +c.textContent + 1;
+    }));
+  }, 650);
+}
+document.querySelectorAll('.wrap > section').forEach(sec => {
+  const h2 = sec.querySelector('h2');
+  if (!h2 || h2.querySelector('.sec-replay')) return;
+  const btn = document.createElement('button');
+  btn.className = 'sec-replay';
+  btn.type = 'button';
+  btn.textContent = '↻ replay section';
+  btn.addEventListener('click', () => replaySection(sec));
+  h2.appendChild(btn);
+});
 </script>
 </body>
 </html>
