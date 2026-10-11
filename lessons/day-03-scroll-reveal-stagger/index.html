@@ -205,20 +205,24 @@ document.querySelectorAll('[data-repeat]').forEach(el => {
 document.querySelectorAll('[data-rm]').forEach(el =>
   observeWith(el, { threshold: 0.15, rootMargin: `0px 0px ${el.dataset.rm}px 0px` }));
 
-// Per-section replay: scroll to the section, strip .in, force reflow, re-add .in —
-// the animation replays in place, no page refresh needed.
+// Per-section replay: scroll to the section, snap back to hidden (transition off),
+// force reflow, then play the entrance again — no page refresh needed.
 function replaySection(sec) {
-  sec.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const r = sec.getBoundingClientRect();
+  const inView = r.top >= 0 && r.bottom <= window.innerHeight;
+  if (!inView) sec.scrollIntoView({ behavior: 'smooth', block: 'center' });
   setTimeout(() => {
     const els = sec.querySelectorAll('.reveal');
-    els.forEach(el => el.classList.remove('in'));
-    void sec.offsetWidth; // force reflow, otherwise remove+add collapse into one frame and the transition never restarts
+    // Kill the transition before stripping .in: otherwise the reset itself fades
+    // out over 0.8s and the "replay" is just a flicker.
+    els.forEach(el => { el.style.transition = 'none'; el.classList.remove('in'); });
+    void sec.offsetWidth; // force reflow so the reset actually lands
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      els.forEach(el => el.classList.add('in'));
+      els.forEach(el => { el.style.transition = ''; el.classList.add('in'); });
       const c = sec.querySelector('#replayCount');
-      if (c) c.textContent = +c.textContent + 1;
+      if (c && inView) c.textContent = +c.textContent + 1;
     }));
-  }, 650);
+  }, inView ? 60 : 650); // already on screen? replay immediately, no scroll wait
 }
 document.querySelectorAll('.wrap > section').forEach(sec => {
   const h2 = sec.querySelector('h2');
