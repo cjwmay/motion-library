@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 4 · GSAP + ScrollTrigger — Motion Library</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  :root { --bg:#0e0e12; --card:#17171d; --text:#eee; --muted:#9a9aa3; --accent:#6c4dff; --green:#7dffb2; }
+  * { box-sizing:border-box; }
+  body { font-family:-apple-system,"Helvetica Neue","Segoe UI",sans-serif; background:var(--bg); color:var(--text); margin:0; padding:40px 24px 120px; }
+  .wrap { max-width:880px; margin:0 auto; }
+  .back { color:var(--muted); text-decoration:none; font-size:14px; }
+  .back:hover { color:var(--accent); }
+  h1 { font-size:32px; margin:16px 0 8px; }
+  .lede { color:var(--muted); font-size:16px; line-height:1.8; }
+  .lede b { color:var(--text); }
+  .cdn-warn { display:none; color:#0e0e12; background:#ffb020; border-radius:10px; padding:10px 18px; font-size:14px; margin-top:18px; font-weight:600; }
+  section { background:var(--card); border:1px solid #26262e; border-radius:14px; padding:28px; margin:80px 0; }
+  section h2 { font-size:18px; margin:0 0 6px; display:flex; align-items:center; }
+  .sec-replay { margin-left:auto; flex:none; font-size:12.5px; padding:6px 14px; border-radius:999px;
+    border:1px solid #2e2e36; background:#101014; color:var(--muted); cursor:pointer;
+    transition:color .25s, border-color .25s; }
+  .sec-replay:hover { color:var(--text); border-color:var(--accent); }
+  section h2 .no { color:var(--accent); margin-right:8px; }
+  section .why { color:var(--muted); font-size:14px; line-height:1.85; margin:0 0 22px; }
+  section .why b { color:var(--text); }
+  section .why code { color:var(--accent); font-family:Menlo,Consolas,monospace; }
+
+  .lab-tall { height:130vh; position:relative; background:#101014; border-radius:10px; border:1px dashed #2e2e36; }
+  .lab-sticky { position:sticky; top:18vh; padding:40px 24px; text-align:center; }
+  .barwrap { height:14px; background:#23232c; border-radius:999px; overflow:hidden; max-width:420px; margin:0 auto 14px; }
+  .bar { height:100%; width:100%; background:linear-gradient(90deg,var(--accent),var(--green)); transform:scaleX(0); transform-origin:left; }
+  .lab-sticky .label { font-size:13px; color:var(--muted); }
+  .lab-sticky .label output { color:var(--accent); font-family:Menlo,Consolas,monospace; }
+
+  .toggle-stage { min-height:180px; display:flex; align-items:center; justify-content:center; background:#101014; border-radius:10px; border:1px dashed #2e2e36; }
+  .toggle-card { width:170px; height:90px; border-radius:10px; background:linear-gradient(135deg,#3a2b6e,#6c4dff);
+    display:flex; align-items:center; justify-content:center; font-size:13px; color:#fff; text-align:center; padding:0 12px; }
+
+  .pin-stage { height:58vh; border-radius:10px; background:#101014; border:1px solid #2e2e36; position:relative; overflow:hidden; }
+  .pin-chip { position:absolute; top:50%; width:110px; height:70px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:13px; color:#fff; }
+  .pin-chip.a { left:8%; background:linear-gradient(135deg,#6c4dff,#3a2b6e); transform:translateY(-50%); }
+  .pin-chip.b { right:8%; background:linear-gradient(135deg,#0f766e,#7dffb2); transform:translateY(-50%); }
+  .pin-progress { position:absolute; bottom:18px; left:0; right:0; text-align:center; font-size:13px; color:var(--muted); }
+  .pin-progress output { color:var(--accent); font-family:Menlo,Consolas,monospace; }
+
+  .plx { height:64vh; border-radius:10px; overflow:hidden; position:relative; background:#0a0a0d; border:1px solid #2e2e36; }
+  .plx-bg { position:absolute; left:-10%; right:-10%; top:-20%; bottom:-20%;
+    background:
+      radial-gradient(400px 200px at 20% 30%, rgba(108,77,255,.35), transparent 60%),
+      radial-gradient(500px 260px at 80% 70%, rgba(125,255,178,.18), transparent 60%),
+      linear-gradient(#121218,#0a0a0d); }
+  .plx-grid { position:absolute; inset:-20% -10%; opacity:.5;
+    background-image:linear-gradient(rgba(108,77,255,.14) 1px, transparent 1px),linear-gradient(90deg, rgba(108,77,255,.14) 1px, transparent 1px);
+    background-size:48px 48px; }
+  .plx-fg { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px; }
+  .plx-fg h3 { font-size:clamp(26px,4.5vw,42px); margin:0 0 10px; letter-spacing:-.5px; }
+  .plx-fg p { color:var(--muted); font-size:14px; margin:0; }
+
+  .js .txtrev span { opacity:.15; }
+  .txtrev { font-size:clamp(20px,3.6vw,32px); line-height:1.9; max-width:640px; margin:0 auto; text-align:center; padding:60px 10px; }
+  .txtrev-hint { text-align:center; font-size:13px; color:var(--muted); margin-top:6px; }
+
+  h2 { font-size:20px; margin:40px 0 12px; }
+  .note { background:var(--card); border-left:3px solid var(--accent); border-radius:0 10px 10px 0; padding:14px 18px; margin:12px 0; font-size:14.5px; line-height:1.85; }
+  .note b { color:var(--accent); }
+  .note code, pre code { color:var(--accent); font-family:Menlo,Consolas,monospace; }
+  pre.code { background:#0a0a0d; border:1px solid #26262e; border-radius:10px; padding:18px; overflow-x:auto;
+    font-size:12.5px; line-height:1.75; color:#c9c9d4; font-family:Menlo,Consolas,monospace; margin:12px 0 0; }
+  ul { color:var(--muted); line-height:1.9; font-size:14.5px; padding-left:20px; }
+  ul b { color:var(--text); }
+  .rm .bar { transform:scaleX(1); }
+  .rm .txtrev span { opacity:1; }
+  .rm .pin-stage { height:auto; min-height:200px; padding:40px 20px; }
+  .rm .pin-chip { position:static; transform:none; margin:10px auto; }
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js');</script>
+<div class="wrap">
+  <a class="back" href="../../index.html">← Motion Library</a>
+  <h1>Day 4 · GSAP + ScrollTrigger</h1>
+  <p class="lede">One sentence: <b>scroll is a timeline</b>. <b>GSAP</b> handles <i>how</i> things animate (readable, maintainable sequencing); <b>ScrollTrigger</b> handles <i>when scroll drives it</i> — <b>scrub</b> turns scroll position into animation progress, <b>pin</b> locks a section in place for multi-step storytelling. Scroll down and "play" each demo by hand. Each section has a ↻ replay button on the right.</p>
+  <div class="cdn-warn" id="cdnWarn">⚠️ GSAP failed to load (needs internet for the CDN). Connect and refresh.</div>
+
+  <section id="s1">
+    <h2><span class="no">01</span>Scrub: the scrollbar is the playhead <button class="sec-replay" data-replay="#s1">↻ Replay</button></h2>
+    <p class="why">Inside this 130vh zone, the bar's fill is <b>bound to your scroll position</b> — scroll up and it rewinds, stop and it freezes. That's <code>scrub</code>: scroll is no longer a trigger, it's the <b>playhead</b>. Below it, a Day-3-style <code>toggle</code> plays once on enter for comparison — two completely different semantics.</p>
+    <div class="lab-tall" id="scrubLab">
+      <div class="lab-sticky">
+        <div class="barwrap"><div class="bar" id="scrubBar"></div></div>
+        <div class="label">scrub progress <output id="scrubPct">0%</output> · scroll up/down, then stop</div>
+      </div>
+    </div>
+    <p class="why" style="margin-top:24px">The number in <code>scrub: 1</code> is <b>smoothing in seconds</b> — the animation trails the scroll by 1s, like inertia; <code>scrub: true</code> locks on frame-perfectly. For portfolios, <b>0.5–1</b> feels tactile without being dizzy.</p>
+    <div class="toggle-stage" id="toggleLab">
+      <div class="toggle-card" id="toggleCard">toggle version<br>plays once on enter</div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">02</span>Pin: hold the screen, tell a story in steps <button class="sec-replay" data-replay="#pinStage">↻ Replay</button></h2>
+    <p class="why">When you reach it, the stage gets <code>pin</code>ned and the next <b>200%</b> of scroll distance becomes a three-step animation: the two chips collide → the purple one spins and scales → the background shifts. This is the standard recipe for scroll-driven case studies: a <code>timeline</code> writes the steps, ScrollTrigger just maps scroll to time.</p>
+    <div class="pin-stage" id="pinStage">
+      <div class="pin-chip a">steps 1·2</div>
+      <div class="pin-chip b">step 1</div>
+      <div class="pin-progress">story progress · step <output id="pinStep">0</output> / 3 · keep scrolling</div>
+    </div>
+    <p class="why" style="margin-top:18px">Notice: the scrollbar keeps moving while the frame stays put — GSAP inserts a <code>pin-spacer</code> that pads the document flow with "fake height". Layout suddenly getting longer is normal, not a bug.</p>
+  </section>
+
+  <section id="s3">
+    <h2><span class="no">03</span>Parallax: foreground and background at different speeds <button class="sec-replay" data-replay="#s3">↻ Replay</button></h2>
+    <p class="why">The glow and grid drift down <b>slowly</b> (<code>yPercent: 15</code>) while the headline rises <b>fast</b> (<code>yPercent: -12</code>) — your brain reads depth automatically. Parallax is just <b>one trigger, different distances</b>; scrub is what locks it to the scroll so tightly.</p>
+    <div class="plx" id="plx">
+      <div class="plx-bg" id="plxBg"></div>
+      <div class="plx-grid" id="plxGrid"></div>
+      <div class="plx-fg" id="plxFg">
+        <h3>parallax</h3>
+        <p>background slow · grid medium · text fast — speed difference = space</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="s4">
+    <h2><span class="no">04</span>Text reveal: light up word by word <button class="sec-replay" data-replay="#s4">↻ Replay</button></h2>
+    <p class="why">Split the sentence into <code>&lt;span&gt;</code>s, then drive a <code>stagger</code> with scrub — scroll more, light more. The Awwwards-hero staple: the reader "reads" the sentence by scrolling, at their own pace.</p>
+    <div class="txtrev" id="txtrev">A great portfolio lets the reader scroll through the story.</div>
+    <div class="txtrev-hint">scroll up and down — the words light from gray to white</div>
+  </section>
+
+  <h2>The minimal runnable code (all four moves)</h2>
+  <pre class="code">&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"&gt;&lt;/script&gt;
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+gsap.registerPlugin(ScrollTrigger);
+
+// 1. scrub: scroll position = animation progress
+gsap.to('.bar', { scaleX: 1, ease: 'none',
+  scrollTrigger: { trigger: '.stage', start: 'top 80%',
+                   end: 'bottom 20%', scrub: 1 } });
+
+// 2. pin + timeline: hold for 200% scroll, play in steps
+const tl = gsap.timeline({ scrollTrigger: {
+  trigger: '.story', start: 'top top',
+  end: '+=200%', pin: true, scrub: 1 } });
+tl.to('.card-a', { x: 300 })
+  .to('.card-b', { rotation: 360 }, '&lt;'); // '&lt;' = at same time as previous
+
+// 3. parallax: same trigger, different distances
+gsap.to('.bg', { yPercent: 30, ease: 'none',
+  scrollTrigger: { trigger: '.hero', start: 'top top',
+                   end: 'bottom top', scrub: true } });
+
+// 4. char-by-char reveal: split into spans + scrub stagger
+el.innerHTML = el.textContent.split('').map(c =&gt; `&lt;span&gt;${c}&lt;/span&gt;`).join('');
+gsap.to(el.querySelectorAll('span'), { opacity: 1, ease: 'none', stagger: 0.05,
+  scrollTrigger: { trigger: el, start: 'top 85%', end: 'bottom 45%', scrub: 1 } });
+
+// 5. re-calibrate trigger positions after assets load (see gotcha)
+window.addEventListener('load', () =&gt; ScrollTrigger.refresh());
+&lt;/script&gt;</pre>
+
+  <div class="note"><b>✏️ Exercise — try it on your site.</b> Open your portfolio draft <b>portfolio-site-draft/index.html</b> and give the hero a scroll narrative: (1) add the two GSAP CDN lines to <code>&lt;head&gt;</code>; (2) wrap the hero in <code>.story</code> with <code>pin + scrub</code> — reveal the headline char by char over 150vh (move 4) while a background glow parallaxes upward (move 3); (3) refresh and scroll slowly — if trigger positions feel "drifty" (animations early/late), add move 5's <code>ScrollTrigger.refresh()</code>. Don't panic when pin stretches the layout — that's the pin-spacer doing its job.</div>
+
+  <div class="note" style="border-left-color:#ff6b6b"><b style="color:#ff6b6b">⚠️ Gotcha (the #1 beginner crash): trigger drift.</b> Images and webfonts haven't loaded when ScrollTrigger measures the page, so every trigger point is computed against the wrong height — then everything drifts once they load. Build the habit: <code>window.addEventListener('load', () =&gt; ScrollTrigger.refresh())</code>, and refresh manually after any async content renders. While debugging, turn on <code>markers: true</code> — the trigger lines draw on screen and the problem is obvious.</div>
+
+  <div class="note"><b>💡 Portfolio cheat sheet:</b> hero entrance choreography (timeline) → scroll narrative (pin + scrub to walk through a case) → parallax bands (hero/section dividers) → char-by-char reveals (manifesto copy). Four moves, and your 11/22 site has a scroll-storytelling skeleton.</div>
+
+  <h2>Back to the <a href="../../index.html" style="color:var(--accent)">Motion Library</a></h2>
+</div>
+
+<script>
+(function () {
+  if (typeof gsap === 'undefined') {
+    document.getElementById('cdnWarn').style.display = 'block';
+    return;
+  }
+  gsap.registerPlugin(ScrollTrigger);
+
+  var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (RM) { document.body.classList.add('rm'); }
+
+  document.querySelectorAll('[data-replay]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var t = document.querySelector(btn.getAttribute('data-replay'));
+      if (!t) return;
+      var y = t.getBoundingClientRect().top + window.scrollY - 30;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  });
+
+  if (RM) { return; }
+
+  var scrubPct = document.getElementById('scrubPct');
+  gsap.to('#scrubBar', { scaleX: 1, ease: 'none',
+    scrollTrigger: { trigger: '#scrubLab', start: 'top bottom', end: 'bottom top',
+      scrub: 0.6, onUpdate: function (self) { scrubPct.textContent = Math.round(self.progress * 100) + '%'; } } });
+
+  gsap.fromTo('#toggleCard', { x: -140, opacity: 0 }, { x: 0, opacity: 1, duration: 0.9, ease: 'power3.out',
+    scrollTrigger: { trigger: '#toggleLab', start: 'top 78%', toggleActions: 'play none none reverse' } });
+
+  var pinStep = document.getElementById('pinStep');
+  var tl = gsap.timeline({ scrollTrigger: {
+    trigger: '#pinStage', start: 'top top', end: '+=200%', pin: true, scrub: 1,
+    onUpdate: function (self) { pinStep.textContent = Math.min(3, Math.floor(self.progress * 3) + 1); } } });
+  tl.to('.pin-chip.a', { x: function () { return document.getElementById('pinStage').offsetWidth / 2 - 140; }, duration: 1, ease: 'power2.inOut' }, 0)
+    .to('.pin-chip.b', { x: function () { return -(document.getElementById('pinStage').offsetWidth / 2 - 140); }, duration: 1, ease: 'power2.inOut' }, 0)
+    .to('.pin-chip.a', { rotation: 360, scale: 1.35, duration: 1, ease: 'power2.inOut' }, 1)
+    .to('#pinStage', { backgroundColor: '#1a1a2e', duration: 1 }, 2);
+
+  gsap.set('#plxBg', { yPercent: -12 });
+  gsap.to('#plxBg', { yPercent: 12, ease: 'none',
+    scrollTrigger: { trigger: '#plx', start: 'top bottom', end: 'bottom top', scrub: true } });
+  gsap.set('#plxGrid', { yPercent: -8 });
+  gsap.to('#plxGrid', { yPercent: 8, ease: 'none',
+    scrollTrigger: { trigger: '#plx', start: 'top bottom', end: 'bottom top', scrub: true } });
+  gsap.fromTo('#plxFg', { yPercent: 10 }, { yPercent: -10, ease: 'none',
+    scrollTrigger: { trigger: '#plx', start: 'top bottom', end: 'bottom top', scrub: true } });
+
+  var el = document.getElementById('txtrev');
+  el.innerHTML = el.textContent.split('').map(function (c) {
+    return '<span>' + (c === ' ' ? '&nbsp;' : c) + '</span>';
+  }).join('');
+  gsap.to('#txtrev span', { opacity: 1, ease: 'none', stagger: 0.06,
+    scrollTrigger: { trigger: '#txtrev', start: 'top 82%', end: 'bottom 42%', scrub: 1 } });
+
+  window.addEventListener('load', function () { ScrollTrigger.refresh(); });
+})();
+</script>
+</body>
+</html>
