@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 5 · Lenis Smooth Scrolling — Motion Library</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.3.4/dist/lenis.min.js"></script>
+<style>
+  :root { --bg:#0e0e12; --card:#17171d; --text:#eee; --muted:#9a9aa3; --accent:#6c4dff; --green:#7dffb2; }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:auto; } /* NO smooth here — it fights Lenis */
+  body { font-family:-apple-system,"Helvetica Neue","Segoe UI",sans-serif; background:var(--bg); color:var(--text); margin:0; padding:40px 24px 120px; }
+  .wrap { max-width:880px; margin:0 auto; }
+  .back { color:var(--muted); text-decoration:none; font-size:14px; }
+  .back:hover { color:var(--accent); }
+  h1 { font-size:32px; margin:16px 0 8px; }
+  .lede { color:var(--muted); font-size:16px; line-height:1.8; }
+  .lede b { color:var(--text); }
+  .lede code { color:var(--accent); font-family:Menlo,Consolas,monospace; }
+  .cdn-warn { display:none; color:#0e0e12; background:#ffb020; border-radius:10px; padding:10px 18px; font-size:14px; margin-top:18px; font-weight:600; }
+  .rm-note { display:none; color:#7dffb2; background:#123326; border-radius:10px; padding:10px 18px; font-size:14px; margin-top:18px; }
+  section { background:var(--card); border:1px solid #26262e; border-radius:14px; padding:28px; margin:80px 0; }
+  section h2 { font-size:18px; margin:0 0 6px; display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
+  section h2 .no { color:var(--accent); margin-right:2px; }
+  .why { color:var(--muted); font-size:14px; line-height:1.85; margin:0 0 22px; }
+  .why b { color:var(--text); }
+  .why code { color:var(--accent); font-family:Menlo,Consolas,monospace; }
+
+  .pill { font-size:12.5px; padding:8px 18px; border-radius:999px; border:1px solid #2e2e36;
+    background:#101014; color:var(--text); cursor:pointer; transition:border-color .25s, color .25s; }
+  .pill:hover { border-color:var(--accent); }
+  .pill.on { border-color:var(--green); color:var(--green); }
+  .pill:disabled { opacity:.4; cursor:not-allowed; }
+
+  .lab-tall { min-height:150vh; position:relative; background:#101014; border-radius:10px;
+    border:1px dashed #2e2e36; padding:20px; }
+  .lab-sticky { position:sticky; top:14px; background:rgba(16,16,20,.92); backdrop-filter:blur(6px);
+    border:1px solid #2e2e36; border-radius:10px; padding:14px 18px; display:flex; gap:14px;
+    align-items:center; flex-wrap:wrap; z-index:5; }
+  .vel { font-family:Menlo,Consolas,monospace; font-size:13px; color:var(--muted); }
+  .vel output { color:var(--accent); font-size:16px; }
+  .rows { margin-top:24px; display:grid; gap:10px; }
+  .row { display:flex; align-items:center; gap:14px; background:#17171d; border:1px solid #26262e;
+    border-radius:8px; padding:12px 16px; font-size:13.5px; }
+  .row .idx { color:var(--accent); font-family:Menlo,Consolas,monospace; font-size:12px; width:34px; flex:none; }
+  .row .t { color:var(--text); } .row .s { color:var(--muted); font-size:12px; margin-left:auto; }
+
+  .dur-row { display:flex; gap:10px; flex-wrap:wrap; margin:6px 0 16px; justify-content:center; }
+  .dur-lab { background:#101014; border:1px dashed #2e2e36; border-radius:10px; padding:26px; text-align:center; }
+  .dur-lab p { color:var(--muted); font-size:13.5px; line-height:1.9; margin:10px 0 0; }
+  .dur-val { font-family:Menlo,Consolas,monospace; color:var(--green); font-size:20px; }
+
+  .jumpnav { position:sticky; top:14px; z-index:6; display:flex; gap:8px; flex-wrap:wrap;
+    background:rgba(16,16,20,.92); backdrop-filter:blur(6px); border:1px solid #2e2e36;
+    border-radius:999px; padding:10px 14px; margin-bottom:22px; }
+  .jumpnav a { color:var(--muted); text-decoration:none; font-size:13px; padding:6px 14px; border-radius:999px;
+    border:1px solid transparent; }
+  .jumpnav a:hover { color:var(--text); border-color:var(--accent); }
+
+  .sync-lab { background:#101014; border-radius:10px; border:1px dashed #2e2e36; padding:40px 24px; text-align:center; }
+  .barwrap { height:14px; background:#23232c; border-radius:999px; overflow:hidden; max-width:420px; margin:0 auto 12px; }
+  .bar { height:100%; width:100%; background:linear-gradient(90deg,var(--accent),var(--green));
+    transform:scaleX(0); transform-origin:left; }
+  .sync-lab .label { font-size:13px; color:var(--muted); }
+  .sync-lab .label output { color:var(--accent); font-family:Menlo,Consolas,monospace; }
+
+  h2 { font-size:20px; margin:40px 0 12px; }
+  .note { background:var(--card); border-left:3px solid var(--accent); border-radius:0 10px 10px 0;
+    padding:14px 18px; margin:12px 0; font-size:14.5px; line-height:1.85; }
+  .note b { color:var(--accent); }
+  .note code { color:var(--accent); font-family:Menlo,Consolas,monospace; }
+  pre.code { background:#0a0a0d; border:1px solid #26262e; border-radius:10px; padding:18px; overflow-x:auto;
+    font-size:12.5px; line-height:1.75; color:#c9c9d4; font-family:Menlo,Consolas,monospace; margin:12px 0 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../../index.html">← Motion Library</a>
+  <h1>Day 5 · Lenis Smooth Scrolling</h1>
+  <p class="lede">One sentence: <b>Lenis adds inertia to scrolling</b> — it intercepts wheel input and drives the <b>native</b> <code>scrollTop</code> through an easing curve, so scrolling becomes a glide. <b>Portfolio usage:</b> enable it site-wide + route anchor links through <code>lenis.scrollTo()</code> — one of the most visible "signature feels" of high-end portfolio sites.</p>
+  <div class="cdn-warn" id="cdnWarn">⚠️ Lenis failed to load (needs internet for the CDN). Native scrolling still works — connect and refresh.</div>
+  <div class="rm-note" id="rmNote">🌿 Your OS has "reduce motion" on, so this page skipped Lenis initialization per <code>prefers-reduced-motion</code> — which is exactly the correct practice taught today.</div>
+
+  <section id="s1">
+    <h2><span class="no">01</span>On / off: feel the "buttery" difference</h2>
+    <p class="why">Scroll through this 150vh project list with your wheel. <b>With Lenis off</b>, it's raw browser scrolling — the page stops the instant you stop. <b>With it on</b>, the same flick keeps gliding. The meter reads <code>velocity</code> straight from Lenis — watch it decay to 0.</p>
+    <div class="lab-tall">
+      <div class="lab-sticky">
+        <button class="pill on" id="toggleLenis">Lenis: ON</button>
+        <span class="vel">velocity <output id="vel">0.0</output> px/frame</span>
+        <span class="vel" style="font-size:12px">👆 flick your wheel, compare on/off</span>
+      </div>
+      <div class="rows" id="rows"></div>
+    </div>
+  </section>
+
+  <section id="s2">
+    <h2><span class="no">02</span>Tuning inertia: <code>duration</code> is the personality</h2>
+    <p class="why"><code>duration</code> is the total inertia time in seconds: <b>0.4s</b> is crisp, <b>1.2s</b> is the standard "butter", <b>2.2s</b> feels like drifting underwater. Switch live and flick the wheel — notice how far the page glides after you stop. The portfolio sweet spot is <b>1.0–1.2s</b>.</p>
+    <div class="dur-lab">
+      <div class="dur-row">
+        <button class="pill" data-dur="0.4">crisp · 0.4s</button>
+        <button class="pill on" data-dur="1.2">butter · 1.2s</button>
+        <button class="pill" data-dur="2.2">float · 2.2s</button>
+      </div>
+      <div class="dur-val">duration = <output id="durVal">1.2</output>s</div>
+      <p>Switch, then scroll — there is no right answer here, only "what character should this site have".</p>
+    </div>
+  </section>
+
+  <section id="s3">
+    <h2><span class="no">03</span>Anchor navigation: <code>lenis.scrollTo()</code></h2>
+    <p class="why">Native <code>&lt;a href="#s1"&gt;</code> teleports — it bypasses Lenis entirely. So intercept anchors and route them through <code>lenis.scrollTo(target, { offset })</code>. Try the nav below: <b>with Lenis on</b> it glides; <b>with Lenis off</b> (toggle back in 01) it degrades to the native jump — graceful, by design.</p>
+    <nav class="jumpnav">
+      <a href="#s1" class="jump">→ 01 on/off</a>
+      <a href="#s2" class="jump">→ 02 tuning</a>
+      <a href="#s4" class="jump">→ 04 GSAP sync</a>
+    </nav>
+    <p class="why" style="margin:0"><code>offset</code> clears sticky headers (e.g. <code>{ offset: -80 }</code>) — otherwise the target slides under the nav, the most common anchor-scroll visual bug.</p>
+  </section>
+
+  <section id="s4">
+    <h2><span class="no">04</span>GSAP integration: the three-line sync</h2>
+    <p class="why">Does Day 4's ScrollTrigger fight Lenis? No — <b>three lines</b> bridge them: <code>lenis.on('scroll', ScrollTrigger.update)</code> keeps triggers aligned with Lenis' position, <code>gsap.ticker</code> drives Lenis' <code>raf</code> on one loop, and <code>lagSmoothing(0)</code> disables GSAP's frame-catchup smoothing (otherwise scrolling feels "jelly"). The scrub bar below is the proof — it's running on top of Lenis right now.</p>
+    <div class="sync-lab">
+      <div class="barwrap"><div class="bar" id="syncBar"></div></div>
+      <div class="label">scrub progress <output id="syncPct">0%</output> · Lenis + ScrollTrigger in sync</div>
+    </div>
+  </section>
+
+  <h2>The minimal runnable code (site-wide, ~30 lines)</h2>
+  <pre class="code">&lt;script src="https://unpkg.com/lenis@1.3.4/dist/lenis.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let lenis = null;
+if (!reduced &amp;&amp; window.Lenis) {
+  lenis = new Lenis({
+    duration: 1.2,                    // inertia time: sweet spot 1.0–1.2
+    easing: t =&gt; Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    smoothWheel: true,
+    syncTouch: false,                 // keep touch native — smoothing it feels floaty
+  });
+
+  // the three-line GSAP ScrollTrigger sync (plain rAF loop if no GSAP)
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add((time) =&gt; lenis.raf(time * 1000));
+  gsap.ticker.lagSmoothing(0);
+
+  // route anchors through Lenis
+  document.querySelectorAll('a[href^="#"]').forEach(a =&gt;
+    a.addEventListener('click', e =&gt; {
+      const el = document.querySelector(a.getAttribute('href'));
+      if (el) { e.preventDefault(); lenis.scrollTo(el, { offset: -80 }); }
+    }));
+}
+&lt;/script&gt;</pre>
+
+  <div class="note"><b>✏️ Exercise — try it on your site.</b> Open your portfolio draft <b>portfolio-site-draft/index.html</b>: (1) add the one-line Lenis CDN to <code>&lt;head&gt;</code>; (2) paste the init above and scroll for 10 seconds; (3) route your nav anchors through <code>lenis.scrollTo</code> (offset for the nav height); (4) turn on "reduce motion" in your OS settings and refresh — confirm the page falls back to native scrolling with everything working.</div>
+
+  <div class="note" style="border-left-color:#ff6b6b"><b style="color:#ff6b6b">⚠️ Gotcha (the #1 beginner crash): delete <code>scroll-behavior: smooth</code>.</b> CSS smooth scrolling fights Lenis — anchor jumps stutter mid-flight and the wheel feels sticky. Rule: <b>on a Lenis page, <code>html</code> must be <code>scroll-behavior: auto</code></b>; smoothing is Lenis' job alone.</div>
+
+  <div class="note"><b>💡 Portfolio cheat sheet:</b> Lenis on site-wide; <code>duration</code> 1.0–1.2s is the butter zone; every anchor nav goes through <code>scrollTo</code>; sync Day 4's GSAP work with the three lines; under <code>prefers-reduced-motion</code> <b>don't initialize at all</b> — respect starts here (Day 8 covers this systematically).</div>
+
+  <h2>Back to the <a href="../../index.html" style="color:var(--accent)">Motion Library</a></h2>
+</div>
+
+<script>
+(function () {
+  var rows = document.getElementById('rows');
+  var names = ['AI Hub · SEO Studio','Enterprise Search','Design System','Motion Library','A11y Playbook','Portfolio v1','Case: Query Builder','Case: Trust Calibration','Tennis Booking','Weather Watch','Job Tracker','Resource Library'];
+  var html = '';
+  for (var i = 0; i < 24; i++) {
+    html += '<div class="row"><span class="idx">' + String(i + 1).padStart(2, '0') + '</span>' +
+      '<span class="t">' + names[i % names.length] + '</span>' +
+      '<span class="s">project ' + (i + 1) + ' / 24</span></div>';
+  }
+  rows.innerHTML = html;
+
+  var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasLenis = typeof window.Lenis !== 'undefined';
+  var hasGsap = typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
+  if (!hasLenis) document.getElementById('cdnWarn').style.display = 'block';
+  if (RM) document.getElementById('rmNote').style.display = 'block';
+
+  var lenis = null, velEl = document.getElementById('vel');
+  var toggleBtn = document.getElementById('toggleLenis');
+
+  function onScroll(e) {
+    if (velEl) velEl.textContent = Math.abs(e.velocity || 0).toFixed(1);
+  }
+
+  function setToggleUI() {
+    toggleBtn.textContent = lenis ? 'Lenis: ON' : 'Lenis: OFF';
+    toggleBtn.classList.toggle('on', !!lenis);
+  }
+
+  function makeLenis(duration) {
+    if (lenis) { lenis.destroy(); lenis = null; }
+    lenis = new Lenis({
+      duration: duration,
+      easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
+      smoothWheel: true,
+      syncTouch: false
+    });
+    lenis.on('scroll', onScroll);
+    if (hasGsap) {
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add(function (time) { if (lenis) lenis.raf(time * 1000); });
+      gsap.ticker.lagSmoothing(0);
+    } else {
+      (function raf(time) { if (lenis) lenis.raf(time); requestAnimationFrame(raf); })(performance.now());
+    }
+    setToggleUI();
+  }
+
+  if (hasLenis && !RM) {
+    makeLenis(1.2);
+    if (hasGsap) {
+      gsap.registerPlugin(ScrollTrigger);
+      var pct = document.getElementById('syncPct');
+      gsap.to('#syncBar', { scaleX: 1, ease: 'none',
+        scrollTrigger: { trigger: '#s4 .sync-lab', start: 'top bottom', end: 'bottom top', scrub: 0.6,
+          onUpdate: function (self) { pct.textContent = Math.round(self.progress * 100) + '%'; } } });
+    }
+  } else {
+    setToggleUI();
+    toggleBtn.disabled = true;
+    toggleBtn.textContent = RM ? 'Lenis: off (system setting)' : 'Lenis: CDN missing';
+  }
+
+  toggleBtn.addEventListener('click', function () {
+    if (lenis) { lenis.destroy(); lenis = null; velEl.textContent = '0.0'; }
+    else { makeLenis(parseFloat(document.getElementById('durVal').textContent) || 1.2); }
+    setToggleUI();
+  });
+
+  document.querySelectorAll('[data-dur]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('[data-dur]').forEach(function (b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+      var d = parseFloat(btn.getAttribute('data-dur'));
+      document.getElementById('durVal').textContent = d.toFixed(1);
+      if (lenis && !RM) makeLenis(d);
+    });
+  });
+
+  document.querySelectorAll('a.jump').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var el = document.querySelector(a.getAttribute('href'));
+      if (el && lenis) { e.preventDefault(); lenis.scrollTo(el, { offset: -90 }); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
